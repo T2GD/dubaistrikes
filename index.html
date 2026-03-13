@@ -39,11 +39,11 @@
             background: #ffffff;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             z-index: 1000;
-            overflow-y: auto; /* Permet au menu de défiler si la liste s'allonge */
+            overflow-y: auto;
             padding: 20px;
             box-sizing: border-box;
             display: flex;
-            flex-direction: column; /* Organise les éléments du menu de haut en bas */
+            flex-direction: column;
         }
         #sidebar h2 {
             font-size: 18px;
@@ -52,6 +52,33 @@
             border-bottom: 2px solid #cb2b3e;
             padding-bottom: 10px;
         }
+
+        /* NOUVEAU : Style du compteur */
+        #counter-box {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+        .counter-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        .counter-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #cb2b3e;
+            font-family: 'Courier New', Courier, monospace; /* Donne un effet d'affichage numérique/clicker */
+            line-height: 1;
+        }
         
         .about-section {
             margin-bottom: 20px;
@@ -59,7 +86,7 @@
             border: 1px solid #e9ecef;
             border-radius: 5px;
             padding: 10px;
-            flex-shrink: 0; /* Empêche la section de s'écraser */
+            flex-shrink: 0;
         }
         .about-section summary {
             font-weight: bold;
@@ -80,7 +107,7 @@
         }
 
         #event-list {
-            flex: 1; /* Prend l'espace disponible */
+            flex: 1;
             margin-bottom: 20px;
         }
         .event-item {
@@ -105,14 +132,13 @@
             line-height: 1.4;
         }
 
-        /* NOUVEAU : Style de l'espace publicitaire */
         .ad-container {
             background-color: #eaeaea;
             padding: 15px;
             text-align: center;
             border: 1px dashed #ccc;
             border-radius: 5px;
-            flex-shrink: 0; /* Garde sa taille fixe en bas du menu */
+            flex-shrink: 0;
         }
         .ad-label {
             font-size: 11px;
@@ -149,6 +175,11 @@
     <div id="app-container">
         <div id="sidebar">
             <h2>Strike History</h2>
+
+            <div id="counter-box">
+                <span class="counter-label">Total Incidents</span>
+                <span class="counter-number" id="incident-count">0</span>
+            </div>
             
             <details class="about-section">
                 <summary>ℹ️ About this map</summary>
@@ -198,6 +229,9 @@
             { lat: 25.2095, lng: 55.2730, date: "03/12/2026", desc: "Sheikh Zayed Road: Interception debris on a building facade." },
             { lat: 25.2124, lng: 55.2818, date: "03/13/2026", desc: "DIFC: Drone strike on a building." }
         ];
+
+        // Mettre à jour le compteur dynamique
+        document.getElementById('incident-count').innerText = frappes.length;
 
         var eventListContainer = document.getElementById('event-list');
 
