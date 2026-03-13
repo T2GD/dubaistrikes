@@ -6,6 +6,7 @@
     <title>Strike Map - Dubai (March 2026)</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
         body, html {
@@ -184,7 +185,7 @@
 
             <div id="counter-box">
                 <span class="counter-label">Total Incidents</span>
-                <span class="counter-number" id="incident-count">0</span>
+                <span class="counter-number" id="incident-count">...</span>
                 <span class="counter-date" id="current-date"></span>
             </div>
             
@@ -210,6 +211,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
     <script>
+        // Initialisation de la carte
         var map = L.map('map').setView([25.2048, 55.2708], 11);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -226,47 +228,61 @@
             shadowSize: [41, 41]
         });
 
-        var frappes = [
-            { lat: 25.1412, lng: 55.1853, date: "03/01/2026", desc: "Burj Al Arab: Debris hit the facade." },
-            { lat: 25.1145, lng: 55.1390, date: "03/01/2026", desc: "Palm Jumeirah: Drone crash near the Fairmont." },
-            { lat: 25.2532, lng: 55.3657, date: "03/07/2026", desc: "DXB Airport: Drone explosion near Concourse A." },
-            { lat: 25.2533, lng: 55.3658, date: "03/11/2026", desc: "DXB Airport: Two drones crashed nearby." },
-            { lat: 25.1969, lng: 55.3432, date: "03/12/2026", desc: "Dubai Creek Harbour: Direct strike on Address Creek Harbour 2 tower." },
-            { lat: 25.2230, lng: 55.2670, date: "03/12/2026", desc: "Al Bada'a: Drone crash in a residential area." },
-            { lat: 25.2095, lng: 55.2730, date: "03/12/2026", desc: "Sheikh Zayed Road: Interception debris on a building facade." },
-            { lat: 25.2124, lng: 55.2818, date: "03/13/2026", desc: "DIFC: Drone strike on a building." }
-        ];
-
-        document.getElementById('incident-count').innerText = frappes.length;
-
+        // Affichage de la date du jour
         var today = new Date();
         var options = { year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('current-date').innerText = "As of " + today.toLocaleDateString('en-US', options);
 
+        // ==============================================================
+        // NOUVEAU : CONNEXION AU FICHIER GOOGLE SHEETS
+        // ==============================================================
+        
+        // Collez le lien de l'Étape 2 entre les guillemets ci-dessous :
+        var csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQGpPr9yrXvi-99nRMYJkSzcweboPZ9z5bwjNnAzL9fs_xeCO_eTCVVTe7MDjBPbWLOtVpzlu2xCxVb/pub?output=csv"; 
+
         var eventListContainer = document.getElementById('event-list');
 
-        frappes.forEach(function(frappe) {
-            
-            var tooltipContent = '<span class="event-date">' + frappe.date + '</span>' + frappe.desc;
-            var marker = L.marker([frappe.lat, frappe.lng], {icon: redIcon}).addTo(map)
-             .bindTooltip(tooltipContent, {
-                 className: 'custom-tooltip',
-                 direction: 'top',
-                 offset: [0, -35]
-             });
-
-            var listItem = document.createElement('div');
-            listItem.className = 'event-item';
-            listItem.innerHTML = '<span class="event-date">' + frappe.date + '</span><span class="event-desc">' + frappe.desc + '</span>';
-            
-            listItem.onclick = function() {
-                map.flyTo([frappe.lat, frappe.lng], 14, {
-                    duration: 1.5
+        // PapaParse va lire votre fichier Google Sheets sur internet
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true, // Indique que la première ligne de votre tableau correspond aux titres (lat, lng...)
+            complete: function(results) {
+                
+                var frappes = results.data;
+                
+                // On filtre pour éviter de compter d'éventuelles lignes vides dans Excel
+                var validFrappes = frappes.filter(function(row) { 
+                    return row.lat && row.lng && row.date && row.desc; 
                 });
-                marker.openTooltip();
-            };
 
-            eventListContainer.appendChild(listItem);
+                // Mise à jour du compteur avec le nombre réel de lignes dans le fichier
+                document.getElementById('incident-count').innerText = validFrappes.length;
+
+                // Création des marqueurs et de la liste pour chaque ligne de votre Excel
+                validFrappes.forEach(function(frappe) {
+                    
+                    var tooltipContent = '<span class="event-date">' + frappe.date + '</span>' + frappe.desc;
+                    var marker = L.marker([parseFloat(frappe.lat), parseFloat(frappe.lng)], {icon: redIcon}).addTo(map)
+                    .bindTooltip(tooltipContent, {
+                        className: 'custom-tooltip',
+                        direction: 'top',
+                        offset: [0, -35]
+                    });
+
+                    var listItem = document.createElement('div');
+                    listItem.className = 'event-item';
+                    listItem.innerHTML = '<span class="event-date">' + frappe.date + '</span><span class="event-desc">' + frappe.desc + '</span>';
+                    
+                    listItem.onclick = function() {
+                        map.flyTo([parseFloat(frappe.lat), parseFloat(frappe.lng)], 14, {
+                            duration: 1.5
+                        });
+                        marker.openTooltip();
+                    };
+
+                    eventListContainer.appendChild(listItem);
+                });
+            }
         });
     </script>
 
