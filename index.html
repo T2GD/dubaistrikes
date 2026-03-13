@@ -175,4 +175,18 @@
 
             var listItem = document.createElement('div');
             listItem.className = 'event-item';
-            listItem.innerHTML = '<span class="event-date">' + frappe.date + '</span><span class="event-desc">' + frappe.desc + '
+            listItem.innerHTML = '<span class="event-date">' + frappe.date + '</span><span class="event-desc">' + frappe.desc + '</span>';
+            
+            listItem.onclick = function() {
+                map.flyTo([frappe.lat, frappe.lng], 14, {
+                    duration: 1.5
+                });
+                marker.openTooltip();
+            };
+
+            eventListContainer.appendChild(listItem);
+        });
+    </script>
+
+</body>
+</html>
